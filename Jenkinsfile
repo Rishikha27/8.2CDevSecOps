@@ -86,6 +86,17 @@ pipeline {
             }
         }
     }
+    stage('Install Dependencies') {
+    steps {
+        script {
+            // Make sure Jenkins uses the NodeJS installation
+            def nodeHome = tool name: 'nodejs', type: 'NodeJS'
+            env.PATH = "${nodeHome}/bin:${env.PATH}"
+        }
+        sh 'npm install'
+    }
+}
+
 
     post {
         success {
