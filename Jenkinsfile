@@ -71,4 +71,7 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline finishe
+            echo 'Pipeline finished. Check console output for details.'
+        }
+    }
+}
