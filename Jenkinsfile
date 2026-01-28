@@ -2,7 +2,11 @@ pipeline {
     agent any
 
     tools {
-        nodejs "nodejs" // Make sure this matches the NodeJS tool in Jenkins
+        nodejs "nodejs" // NodeJS tool name in Jenkins
+    }
+
+    environment {
+        SONAR_TOKEN = credentials('SONAR_TOKEN') // Securely access SonarCloud token
     }
 
     stages {
@@ -20,10 +24,38 @@ pipeline {
             }
         }
 
+        stage('Run Tests') {
+            steps {
+                echo "Running npm tests (pipeline continues even if tests fail)"
+                sh 'npm test || true'
+            }
+        }
+
+        stage('Generate Coverage Report') {
+            steps {
+                echo "Generating coverage report (if available)"
+                sh 'npm run coverage || true'
+            }
+        }
+
         stage('NPM Audit (Security Scan)') {
             steps {
-                echo "Running npm audit to check for known vulnerabilities"
-                sh 'npm audit || true' // Shows vulnerabilities without failing the pipeline
+                echo "Running npm audit for known vulnerabilities"
+                sh 'npm audit || true'
+            }
+        }
+
+        stage('SonarCloud Analysis') {
+            steps {
+                echo "Running SonarCloud analysis"
+                sh '''
+                #!/bin/bash
+                # Download SonarScanner CLI
+                curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.12.0.3872-macosx.zip
+                unzip -qq sonar-scanner.zip
+                export PATH=$PWD/sonar-scanner-5.12.0.3872-macosx/bin:$PATH
+                sonar-scanner -Dsonar.login=$SONAR_TOKEN
+                '''
             }
         }
 
@@ -38,7 +70,7 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline executed successfully! Check the archived audit report."
+            echo "Pipeline executed successfully! Check SonarCloud and audit report."
         }
         failure {
             echo "Pipeline failed. Check previous stages for errors."
