@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('SONAR_TOKEN') // Your SonarCloud token stored in Jenkins credentials
-        NODEJS_HOME = tool name: 'NodeJS', type: 'NodeJS' // Make sure NodeJS is installed in Jenkins
+        NODEJS_HOME = tool name: 'nodejs', type: 'NodeJS' // Make sure NodeJS is installed in Jenkins
         PATH = "${env.NODEJS_HOME}/bin:${env.PATH}"
     }
 
